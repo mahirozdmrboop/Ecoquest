@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoQuest - Karbon Ayak İzi & Sürdürülebilirlik Rehberi</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Symbols & Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        eco: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        @keyframes ecoPop { 0%{transform:scale(.75) rotate(-4deg);opacity:0} 60%{transform:scale(1.08) rotate(2deg);opacity:1} 100%{transform:scale(1) rotate(0)} }
+        @keyframes ecoShine { 0%{transform:translateX(-120%) rotate(18deg)} 100%{transform:translateX(220%) rotate(18deg)} }
+        @keyframes ecoPulse { 0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,.18)} 50%{box-shadow:0 0 0 10px rgba(245,158,11,0)} }
+        .achievement-earned { animation: ecoPop .55s ease-out both, ecoPulse 2.2s ease-in-out .55s infinite; position:relative; overflow:hidden; }
+        .achievement-earned::after { content:""; position:absolute; top:-40%; left:-35%; width:22%; height:180%; background:rgba(255,255,255,.65); transform:rotate(18deg); animation:ecoShine 2.2s ease-out .3s 1; pointer-events:none; }
+        .quiz-correct-pop { animation: ecoPop .35s ease-out; }
+        @keyframes questionSlideIn { from { opacity:0; transform:translateY(10px) scale(.99); } to { opacity:1; transform:translateY(0) scale(1); } }
+        .quiz-question-enter { animation: questionSlideIn .28s ease-out both; }
+        #quiz-options-container button { animation: questionSlideIn .24s ease-out both; }
+        #quiz-options-container button:nth-child(2) { animation-delay:.025s; }
+        #quiz-options-container button:nth-child(3) { animation-delay:.05s; }
+        #quiz-options-container button:nth-child(4) { animation-delay:.075s; }
+        .quiz-option-enter { animation: fadeIn .28s ease-out both; }
+        .quiz-option-enter:focus-visible { outline: 3px solid #f59e0b; outline-offset: 2px; }
+        @media (prefers-reduced-motion: reduce) { .achievement-earned, .achievement-earned::after, .quiz-correct-pop, .cup-unlocked, .quiz-option-enter { animation: none !important; } }
+        .cup-unlocked { animation: ecoPop .7s cubic-bezier(.2,.8,.2,1); }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col pb-24">
+
+    <!-- Top Header -->
+    <header class="bg-gradient-to-r from-emerald-600 via-green-600 to-teal-700 text-white shadow-lg sticky top-0 z-40">
+        <div class="max-w-4xl mx-auto px-4 py-3.5 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-xl shadow-inner">
+                    🌱
+                </div>
+                <div>
+                    <h1 class="text-lg font-extrabold tracking-tight">EcoQuest</h1>
+                    <p class="text-xs text-emerald-100 font-medium">Doğa Dostu Yaşam Rehberi</p>
+                </div>
+            </div>
+            
+            <!-- Gamification Status Bar -->
+            <div class="flex items-center space-x-3 bg-black/20 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/10">
+                <div class="flex items-center space-x-1.5 text-xs font-bold text-amber-300" title="Eco Puan">
+                    <i class="fa-solid fa-star"></i>
+                    <span id="header-points">120</span>
+                </div>
+                <div class="h-3 w-px bg-white/20"></div>
+                <div class="flex items-center space-x-1.5 text-xs font-bold text-amber-200" title="Kazanılan kupalar">
+                    <i class="fa-solid fa-trophy"></i>
+                    <span id="header-cups">0 Kupa</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-4xl w-full mx-auto px-4 py-6 overflow-y-auto">
+
+        <!-- ================= TAB 1: ANA SAYFA ================= -->
+        <div id="tab-home" class="tab-content space-y-6 animate-fade-in">
+            <!-- Welcome Card -->
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-500 to-teal-700 text-white p-6 shadow-xl">
+                <div class="absolute -right-6 -bottom-6 opacity-10 text-9xl">
+                    <i class="fa-solid fa-earth-americas"></i>
+                </div>
+                <div class="relative z-10">
+                    <span class="inline-block bg-white/20 backdrop-blur-md text-xs font-bold px-3 py-1 rounded-full mb-3 uppercase tracking-wider">
+                        Günlük Çevre Görevi 🌍
+                    </span>
+                    <h2 class="text-2xl font-black mb-2">Gezegenimizi Birlikte İyileştirelim!</h2>
+                    <p class="text-emerald-100 text-sm mb-5 leading-relaxed max-w-lg">
+                        Karbon ayak izinizi yaklaşık olarak değerlendirin, israfı azaltma ipuçlarını keşfedin, quizlerle bilginizi test edin ve dünyamız için harekete geçin.
+                    </p>
+                    <div class="flex flex-wrap gap-3">
+                        <button onclick="switchTab('calculator')" class="bg-white text-emerald-800 font-bold px-5 py-2.5 rounded-2xl shadow-md hover:bg-emerald-50 transition transform active:scale-95 text-sm flex items-center space-x-2">
+                            <i class="fa-solid fa-calculator text-emerald-600"></i>
+                            <span>Ayak İzi Ölç</span>
+                        </button>
+                        <button onclick="switchTab('quiz')" class="bg-emerald-800/60 backdrop-blur-md text-white font-bold px-5 py-2.5 rounded-2xl border border-white/20 hover:bg-emerald-800 transition transform active:scale-95 text-sm flex items-center space-x-2">
+                            <i class="fa-solid fa-gamepad text-amber-300"></i>
+                            <span>Hemen Test Çöz</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-3">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-fire"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400 font-semibold">Seri (Streak)</p>
+                        <p class="text-lg font-black text-slate-700"><span id="stat-streak">3</span> Gün</p>
+                    </div>
+                </div>
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-3">
+                    <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-medal"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400 font-semibold">Rozetler</p>
+                        <p class="text-lg font-black text-slate-700"><span id="stat-badges">0</span> / 6</p>
+                    </div>
+                </div>
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-3">
+                    <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-check-to-slot"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400 font-semibold">Atık Görevi</p>
+                        <p class="text-lg font-black text-slate-700"><span id="stat-tasks">4</span> Tamam</p>
+                    </div>
+                </div>
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-3">
+                    <div class="w-12 h-12 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-seedling"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400 font-semibold">Karbon Seviyesi</p>
+                        <p class="text-sm font-black text-emerald-600 truncate" id="stat-footprint-status">Henüz Ölçülmedi</p>
+                    </div>
+                </div>
+            </div>
+
+            <section class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100">
+                <div class="flex items-center justify-between mb-4">
+                    <div><h3 class="font-extrabold text-slate-800 text-lg">Başarılar & Kupalar</h3>
+                    <p class="text-xs text-slate-500 mt-1">Rozetler düzenli başarıları, gizli kupalar özel başarıları temsil eder.</p></div>
+                    <span id="hidden-cup-counter" class="text-xs font-bold text-amber-600 bg-amber-50 px-3 py-1.5 rounded-xl">Gizli Kupalar: 0 / 5</span>
+                </div>
+                <div id="achievement-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+            </section>
+
+            <!-- Features Navigation Shortcuts -->
+            <div class="space-y-3">
+                <h3 class="font-extrabold text-slate-800 text-lg">Keşfet & Uygula</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div onclick="switchTab('calculator')" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 hover:border-emerald-300 transition cursor-pointer flex items-center space-x-4 group">
+                        <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl group-hover:scale-110 transition">
+                            📊
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-slate-800 group-hover:text-emerald-600 transition">Karbon Ayak İzi Ölçer</h4>
+                            <p class="text-xs text-slate-500 mt-0.5">Ulaşım, ev, beslenme ve dijital emisyonlarınızı hesaplayın.</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-emerald-500 transition"></i>
+                    </div>
+
+                    <div onclick="switchTab('learn')" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 hover:border-emerald-300 transition cursor-pointer flex items-center space-x-4 group">
+                        <div class="w-14 h-14 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-2xl group-hover:scale-110 transition">
+                            🧠
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-slate-800 group-hover:text-indigo-600 transition">Öğren & Bilgi Kartları</h4>
+                            <p class="text-xs text-slate-500 mt-0.5">Doğa, geri dönüşüm ve ekoloji hakkında pratik bilgiler.</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-indigo-500 transition"></i>
+                    </div>
+
+                    <div onclick="switchTab('quiz')" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 hover:border-emerald-300 transition cursor-pointer flex items-center space-x-4 group">
+                        <div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-2xl group-hover:scale-110 transition">
+                            🎮
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-slate-800 group-hover:text-amber-600 transition">Test Et & Yarış</h4>
+                            <p class="text-xs text-slate-500 mt-0.5">Bilginizi sınayın; puan yalnızca tamamlanan uygulamalı görevlerden kazanılır.</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-amber-500 transition"></i>
+                    </div>
+
+                    <div onclick="switchTab('waste')" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 hover:border-emerald-300 transition cursor-pointer flex items-center space-x-4 group">
+                        <div class="w-14 h-14 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center text-2xl group-hover:scale-110 transition">
+                            ♻️
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-slate-800 group-hover:text-rose-600 transition">İsrafı Azalt & Checklist</h4>
+                            <p class="text-xs text-slate-500 mt-0.5">Gıda, su, enerji israfına son verin ve günlük görevleri tamamlayın.</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-rose-500 transition"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 2: KARBON AYAK İZİ ÖLÇME ================= -->
+        <div id="tab-calculator" class="tab-content hidden space-y-6 animate-fade-in">
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 space-y-6">
+                <div>
+                    <span class="text-xs font-extrabold text-emerald-600 uppercase tracking-wider">Detaylı Hesaplama</span>
+                    <h2 class="text-xl font-black text-slate-800 mt-1">Karbon Ayak İzi Hesaplayıcı</h2>
+                    <p class="text-xs text-slate-500 mt-1">Aşağıdaki alanları yaşam tarzınıza göre güncelleyin ve basitleştirilmiş yıllık CO₂e tahminini görün.</p>
+                </div>
+
+                <!-- Sliders Form -->
+                <div class="space-y-5">
+                    <!-- Ulaşım -->
+                    <div class="space-y-2 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="font-bold text-slate-700 flex items-center space-x-2">
+                                <i class="fa-solid fa-car text-emerald-600"></i>
+                                <span>Haftalık Araç Sürüşü (km)</span>
+                            </span>
+                            <span id="val-transport" class="font-extrabold text-emerald-600 bg-white px-3 py-1 rounded-xl shadow-xs border border-slate-200">100 km</span>
+                        </div>
+                        <input type="range" id="input-transport" min="0" max="1000" step="10" value="100" class="w-full accent-emerald-600 cursor-pointer" oninput="updateCalculatorPreview()">
+                        <p class="text-[11px] text-slate-400">Özel araç veya taksiyle haftada ortalama kaç kilometre yol yapıyorsunuz?</p>
+                    </div>
+
+                    <!-- Beslenme -->
+                    <div class="space-y-2 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="font-bold text-slate-700 flex items-center space-x-2">
+                                <i class="fa-solid fa-utensils text-emerald-600"></i>
+                                <span>Et Tüketim Sıklığı</span>
+                            </span>
+                            <span id="val-diet-text" class="font-extrabold text-emerald-600 bg-white px-3 py-1 rounded-xl shadow-xs border border-slate-200">Orta (Haftada 3-4 gün)</span>
+                        </div>
+                        <select id="input-diet" class="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-700 focus:outline-none focus:border-emerald-500" onchange="updateCalculatorPreview()">
+                            <option value="1">Vegan / Vejetaryen (Çok Düşük Emisyon)</option>
+                            <option value="2" selected>Dengeli / Az Et Tüketimi (Orta Emisyon)</option>
+                            <option value="3">Her Gün Et ve Hayvansal Ürün (Yüksek Emisyon)</option>
+                        </select>
+                    </div>
+
+                    <!-- Ev Enerjisi -->
+                    <div class="space-y-2 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="font-bold text-slate-700 flex items-center space-x-2">
+                                <i class="fa-solid fa-bolt text-emerald-600"></i>
+                                <span>Aylık Elektrik Tüketimi (kWh)</span>
+                            </span>
+                            <span id="val-energy" class="font-extrabold text-emerald-600 bg-white px-3 py-1 rounded-xl shadow-xs border border-slate-200">500 kWh</span>
+                        </div>
+                        <input type="range" id="input-energy" min="50" max="2000" step="25" value="500" class="w-full accent-emerald-600 cursor-pointer" oninput="updateCalculatorPreview()">
+                        <p class="text-[11px] text-slate-400">Bu alan yalnızca elektrik tüketimini temsil eder; ısınma yakıtları ayrı hesaplanmalıdır.</p>
+                    </div>
+
+                    <!-- Dijital Ayak İzi -->
+                    <div class="space-y-2 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="font-bold text-slate-700 flex items-center space-x-2">
+                                <i class="fa-solid fa-laptop text-emerald-600"></i>
+                                <span>Günlük İnternet / Video Süresi (Saat)</span>
+                            </span>
+                            <span id="val-digital" class="font-extrabold text-emerald-600 bg-white px-3 py-1 rounded-xl shadow-xs border border-slate-200">4 Saat</span>
+                        </div>
+                        <input type="range" id="input-digital" min="1" max="16" step="1" value="4" class="w-full accent-emerald-600 cursor-pointer" oninput="updateCalculatorPreview()">
+                        <p class="text-[11px] text-slate-400">Veri merkezleri ve bulut sunucularının tükettiği enerji.</p>
+                    </div>
+                </div>
+
+                <!-- Calculate Button -->
+                <button onclick="calculateCarbonFootprint()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-emerald-600/20 transition transform active:scale-98 flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-calculator"></i>
+                    <span>Sonucu Hesapla</span>
+                </button>
+            </div>
+
+            <!-- Result Card (Hidden Initially) -->
+            <div id="calculator-result-card" class="hidden bg-gradient-to-br from-slate-900 to-slate-800 text-white p-6 rounded-3xl shadow-xl space-y-6 animate-fade-in">
+                <div class="flex items-center justify-between border-b border-slate-700 pb-4">
+                    <div>
+                        <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Analiz Sonucu</span>
+                        <h3 class="text-xl font-black mt-0.5">Yıllık Karbon Ayak İziniz</h3>
+                    </div>
+                    <div id="result-badge-icon" class="w-14 h-14 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center text-2xl">
+                        🌱
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                    <div class="bg-white/5 backdrop-blur-md p-5 rounded-2xl border border-white/10 text-center">
+                        <p class="text-xs text-slate-400 font-semibold">Toplam Emisyon</p>
+                        <p class="text-3xl font-black text-emerald-400 mt-1"><span id="result-tons">4.2</span> <span class="text-sm font-normal text-slate-300">ton CO₂ / yıl</span></p>
+                        <p id="result-status-text" class="text-xs font-bold text-emerald-300 mt-2 bg-emerald-500/10 py-1 px-3 rounded-full inline-block">Hesaplama sonucu (yaklaşık)</p>
+                    </div>
+                    <div class="space-y-3">
+                        <h4 class="text-xs font-extrabold text-slate-300 uppercase tracking-wider">Özel İyileştirme Önerileri:</h4>
+                        <ul id="result-recommendations" class="space-y-2 text-xs text-slate-300">
+                            <!-- JS ile doldurulacak -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 3: ÖĞREN & BİLGİ KARTLARI ================= -->
+        <div id="tab-learn" class="tab-content hidden space-y-6 animate-fade-in">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <span class="text-xs font-extrabold text-indigo-600 uppercase tracking-wider">Ekoloji Kütüphanesi</span>
+                    <h2 class="text-xl font-black text-slate-800 mt-1">Öğren & Bilgi Kartları</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Doğayı korumanın püf noktalarını kategorize edilmiş kartlarla keşfedin.</p>
+                </div>
+
+                <!-- Category Filters -->
+                <div class="flex flex-wrap gap-2" id="flashcard-filters">
+                    <button onclick="filterFlashcards('all', this)" class="category-btn active px-3.5 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow-sm transition">Tümü</button>
+                    <button onclick="filterFlashcards('transport', this)" class="category-btn px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition">Ulaşım</button>
+                    <button onclick="filterFlashcards('diet', this)" class="category-btn px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition">Beslenme</button>
+                    <button onclick="filterFlashcards('energy', this)" class="category-btn px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition">Enerji</button>
+                    <button onclick="filterFlashcards('digital', this)" class="category-btn px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition">Dijital</button>
+                    <button onclick="filterFlashcards('waste', this)" class="category-btn px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition">Su & Atık</button>
+                </div>
+            </div>
+
+            <!-- Flashcards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="flashcards-container">
+                <!-- JavaScript ile dinamik yüklenecek -->
+            </div>
+        </div>
+
+        <!-- ================= TAB 4: TEST ET & QUIZ ================= -->
+        <div id="tab-quiz" class="tab-content hidden space-y-6 animate-fade-in">
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 space-y-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <span class="text-xs font-extrabold text-amber-600 uppercase tracking-wider">İnteraktif Sınav</span>
+                        <h2 class="text-xl font-black text-slate-800 mt-1">Eko-Bilgi Sınavı</h2>
+                        <p class="text-[11px] text-slate-400 mt-1">50 soruluk havuzdan her testte 10 soru rastgele seçilir.</p>
+                    </div>
+                    <div class="bg-amber-50 text-amber-700 px-3 py-1 rounded-xl text-xs font-extrabold border border-amber-200">
+                        Soru <span id="quiz-current-num">1</span> / <span id="quiz-total-num">10</span>
+                    </div>
+                </div>
+
+                <!-- Quiz Progress Bar -->
+                <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                    <div id="quiz-progress-bar" class="bg-amber-500 h-full transition-all duration-300" style="width: 10%;"></div>
+                </div>
+
+                <!-- Question Box -->
+                <div id="quiz-question-box" class="space-y-4">
+                    <h3 id="quiz-question-text" class="text-base font-bold text-slate-800 leading-snug">
+                        Soru yükleniyor...
+                    </h3>
+                    <div class="grid grid-cols-1 gap-2.5" id="quiz-options-container">
+                        <!-- Seçenekler buraya gelecek -->
+                    </div>
+                </div>
+
+                <!-- Explanation Box -->
+                <div id="quiz-explanation-box" class="hidden p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-700 space-y-2">
+                    <p class="font-bold text-slate-900 flex items-center space-x-1.5">
+                        <i class="fa-solid fa-circle-info text-emerald-600"></i>
+                        <span>Bilgi Notu:</span>
+                    </p>
+                    <p id="quiz-explanation-text"></p>
+                    <button onclick="nextQuizQuestion()" class="mt-2 bg-slate-800 text-white font-bold px-4 py-2 rounded-xl text-xs hover:bg-slate-900 transition flex items-center space-x-1.5">
+                        <span>Sonraki Soru</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- Quiz Complete State -->
+                <div id="quiz-complete-box" class="hidden text-center py-8 space-y-4">
+                    <div class="w-20 h-20 bg-amber-100 text-amber-600 rounded-3xl mx-auto flex items-center justify-center text-3xl shadow-inner">
+                        🏆
+                    </div>
+                    <h3 class="text-2xl font-black text-slate-800">Tebrikler, Testi Tamamladınız!</h3>
+                    <p class="text-sm text-slate-600">Doğru Sayısı: <strong id="quiz-final-score" class="text-emerald-600">0</strong> / 10</p>
+                    <p class="text-xs text-slate-500">50 soruluk havuzdan rastgele seçilen 10 soru tamamlandı. Bilgi kartları puan kazandırmaz.</p>
+                    <button onclick="restartQuiz()" class="bg-emerald-600 text-white font-bold px-6 py-3 rounded-2xl shadow-md hover:bg-emerald-700 transition text-sm">
+                        Tekrar Test Çöz
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 5: İSRAFI AZALT & CHECKLIST ================= -->
+        <div id="tab-waste" class="tab-content hidden space-y-6 animate-fade-in">
+            <div class="space-y-2">
+                <span class="text-xs font-extrabold text-rose-600 uppercase tracking-wider">Sürdürülebilir Yaşam</span>
+                <h2 class="text-xl font-black text-slate-800">İsrafı Önleme & Sıfır Atık Rehberi</h2>
+                <p class="text-xs text-slate-500">Gıda, su, tekstil ve enerji israfını önlemek için günlük görevleri tamamlayın.</p>
+            </div>
+
+            <!-- Category Tabs for Waste -->
+            <div class="flex gap-2 overflow-x-auto pb-1 hide-scrollbar">
+                <button onclick="filterWasteCategory('all', this)" class="waste-cat-btn active px-4 py-2 rounded-xl text-xs font-bold bg-rose-600 text-white whitespace-nowrap shadow-sm transition">Tüm Görevler</button>
+                <button onclick="filterWasteCategory('food', this)" class="waste-cat-btn px-4 py-2 rounded-xl text-xs font-bold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 whitespace-nowrap transition">🍎 Gıda İsrafı</button>
+                <button onclick="filterWasteCategory('water', this)" class="waste-cat-btn px-4 py-2 rounded-xl text-xs font-bold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 whitespace-nowrap transition">💧 Su Tasarrufu</button>
+                <button onclick="filterWasteCategory('fashion', this)" class="waste-cat-btn px-4 py-2 rounded-xl text-xs font-bold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 whitespace-nowrap transition">👕 Hızlı Moda</button>
+                <button onclick="filterWasteCategory('energy', this)" class="waste-cat-btn px-4 py-2 rounded-xl text-xs font-bold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 whitespace-nowrap transition">⚡ Enerji İsrafı</button>
+            </div>
+
+            <!-- Interactive Checklist Container -->
+            <div class="space-y-3" id="waste-checklist-container">
+                <!-- JavaScript ile yüklenecek -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Fixed Bottom Navigation Bar with Symbols & Icons -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-slate-200/80 shadow-2xl z-50 py-2 px-4">
+        <div class="max-w-md mx-auto flex items-center justify-around">
+            <button onclick="switchTab('home')" id="nav-btn-home" class="nav-btn flex flex-col items-center justify-center py-1 px-3 rounded-2xl text-emerald-600 transition group">
+                <i class="fa-solid fa-house text-lg mb-1 group-hover:scale-110 transition"></i>
+                <span class="text-[11px] font-bold">Ana Sayfa</span>
+            </button>
+            <button onclick="switchTab('calculator')" id="nav-btn-calculator" class="nav-btn flex flex-col items-center justify-center py-1 px-3 rounded-2xl text-slate-400 hover:text-slate-600 transition group">
+                <i class="fa-solid fa-chart-pie text-lg mb-1 group-hover:scale-110 transition"></i>
+                <span class="text-[11px] font-bold">Ölçer</span>
+            </button>
+            <button onclick="switchTab('learn')" id="nav-btn-learn" class="nav-btn flex flex-col items-center justify-center py-1 px-3 rounded-2xl text-slate-400 hover:text-slate-600 transition group">
+                <i class="fa-solid fa-brain text-lg mb-1 group-hover:scale-110 transition"></i>
+                <span class="text-[11px] font-bold">Öğren</span>
+            </button>
+            <button onclick="switchTab('quiz')" id="nav-btn-quiz" class="nav-btn flex flex-col items-center justify-center py-1 px-3 rounded-2xl text-slate-400 hover:text-slate-600 transition group">
+                <i class="fa-solid fa-gamepad text-lg mb-1 group-hover:scale-110 transition"></i>
+                <span class="text-[11px] font-bold">Test Et</span>
+            </button>
+            <button onclick="switchTab('waste')" id="nav-btn-waste" class="nav-btn flex flex-col items-center justify-center py-1 px-3 rounded-2xl text-slate-400 hover:text-slate-600 transition group">
+                <i class="fa-solid fa-recycle text-lg mb-1 group-hover:scale-110 transition"></i>
+                <span class="text-[11px] font-bold">İsrafı Azalt</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Application JavaScript -->
+    <script>
+        // State Management
+        const BADGES = [
+            { id:'first-task', icon:'fa-seedling', title:'İlk Yeşil Adım', desc:'İlk çevre görevini tamamla.', test:st=>st.completedTasks.length>=1 },
+            { id:'ten-tasks', icon:'fa-leaf', title:'Yeşil Alışkanlık', desc:'10 çevre görevini tamamla.', test:st=>st.completedTasks.length>=10 },
+            { id:'twenty-five-tasks', icon:'fa-recycle', title:'Döngü Ustası', desc:'25 çevre görevini tamamla.', test:st=>st.completedTasks.length>=25 },
+            { id:'quiz-starter', icon:'fa-brain', title:'Bilgi Kaşifi', desc:'Bir 10 soruluk testte en az 8 doğru yap.', test:st=>st.bestQuizScore>=8 },
+            { id:'calculator', icon:'fa-calculator', title:'Ayak İzi Araştırmacısı', desc:'Karbon ayak izi eğitim hesaplamasını tamamla.', test:st=>st.footprintStatus!=='Henüz Ölçülmedi' },
+            { id:'knowledge-reader', icon:'fa-book-open', title:'Bilgi Koleksiyoncusu', desc:'25 bilgi kartını öğrenildi olarak işaretle.', test:st=>st.learnedCards.length>=25 }
+        ];
+        const HIDDEN_CUPS = [
+            { id:'perfect-10', icon:'fa-crown', secretTitle:'Kusursuz Tur', desc:'Tek bir rastgele 10 soruluk testte 10/10 yap.', test:st=>st.perfectQuizzes>=1 },
+            { id:'all-tasks', icon:'fa-trophy', secretTitle:'Eko-Görev Efsanesi', desc:'Tüm çevre görevlerini tamamla.', test:st=>st.completedTasks.length>=wasteChecklistData.length },
+            { id:'fifty-cards', icon:'fa-star', secretTitle:'Bilgi Arşivcisi', desc:'50 bilgi kartının tamamını öğrenildi olarak işaretle.', test:st=>st.learnedCards.length>=flashcardsData.length },
+            { id:'quiz-marathon', icon:'fa-medal', secretTitle:'İstikrarlı Bilge', desc:'3 ayrı testte en az 8/10 yap.', test:st=>st.highScoreQuizzes>=3 },
+            { id:'fifty-master', icon:'fa-gem', secretTitle:'Şansın ve Bilginin Efsanesi', desc:'50 soruluk havuzdaki her soruyu farklı denemelerde en az bir kez doğru cevapla. Her testte yalnızca 10 soru rastgele geldiği için hem bilgi hem de şans gerekir.', test:st=>st.masteredQuestions.length>=50 }
+        ];
+        let appState = {
+            points:0, streak:0, badges:[], hiddenCups:[], completedTasks:[], learnedCards:[],
+            footprintStatus:'Henüz Ölçülmedi', quizCurrentIndex:0, quizScore:0, quizAnswered:false,
+            bestQuizScore:0, quizzesCompleted:0, highScoreQuizzes:0, totalCorrectAnswers:0, perfectQuizzes:0, masteredQuestions:[], quizPoolVersion:3
+        };
+        function normalizeState(){
+            appState.points=Number(appState.points)||0; appState.streak=Number(appState.streak)||0;
+            appState.completedTasks=Array.isArray(appState.completedTasks)?appState.completedTasks:[];
+            appState.learnedCards=Array.isArray(appState.learnedCards)?appState.learnedCards:[];
+            appState.badges=Array.isArray(appState.badges)?appState.badges:[];
+            appState.hiddenCups=Array.isArray(appState.hiddenCups)?appState.hiddenCups:[];
+            appState.bestQuizScore=Number(appState.bestQuizScore)||0; appState.quizzesCompleted=Number(appState.quizzesCompleted)||0;
+            appState.highScoreQuizzes=Number(appState.highScoreQuizzes)||0; appState.totalCorrectAnswers=Number(appState.totalCorrectAnswers)||0; appState.perfectQuizzes=Number(appState.perfectQuizzes)||0; appState.masteredQuestions=Array.isArray(appState.masteredQuestions)?appState.masteredQuestions:[];
+            if(appState.quizPoolVersion!==3){appState.masteredQuestions=[];appState.quizPoolVersion=3;}
+            delete appState.level;
+        }
+        function loadState(){
+            const saved=localStorage.getItem('ecoquest_state_v3');
+            if(saved){try{appState=JSON.parse(saved);}catch(e){console.error('Durum yüklenemedi:',e);}}
+            normalizeState(); awardAchievements(false); updateHeaderUI(); updateHomeStats();
+        }
+        function saveState(){normalizeState();localStorage.setItem('ecoquest_state_v3',JSON.stringify(appState));updateHeaderUI();updateHomeStats();}
+        function updateHeaderUI(){
+            document.getElementById('header-points').innerText=appState.points;
+            document.getElementById('header-cups').innerText=`${appState.hiddenCups.length} Kupa`;
+        }
+        function updateHomeStats(){
+            document.getElementById('stat-streak').innerText=appState.streak;
+            document.getElementById('stat-badges').innerText=appState.badges.length;
+            document.getElementById('stat-tasks').innerText=appState.completedTasks.length;
+            document.getElementById('stat-footprint-status').innerText=appState.footprintStatus;
+            renderAchievements();
+        }
+        function addPoints(amt){appState.points+=amt;saveState();}
+        function showNotification(msg){
+            const notif=document.createElement('div');
+            notif.className='achievement-earned fixed top-16 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl z-50 text-xs font-bold animate-fade-in border border-slate-700 flex items-center space-x-2';
+            notif.innerHTML=`<i class="fa-solid fa-award text-amber-400 text-base"></i><span>${msg}</span>`;
+            document.body.appendChild(notif);setTimeout(()=>notif.remove(),3000);
+        }
+        function awardAchievements(notify=true){
+            const nb=[],nc=[];
+            BADGES.forEach(x=>{if(x.test(appState)&&!appState.badges.includes(x.id)){appState.badges.push(x.id);nb.push(x.title);}});
+            HIDDEN_CUPS.forEach(x=>{if(x.test(appState)&&!appState.hiddenCups.includes(x.id)){appState.hiddenCups.push(x.id);nc.push(x.secretTitle);}});
+            if(notify){nb.forEach(x=>showNotification(`🏅 Rozet kazanıldı: ${x}`));nc.forEach(x=>showNotification(`🏆 Gizli kupa keşfedildi: ${x}`));}
+        }
+        function renderAchievements(){
+            const grid=document.getElementById('achievement-grid'); if(!grid)return; grid.innerHTML='';
+            BADGES.forEach(x=>{
+                const e=appState.badges.includes(x.id),c=document.createElement('div');
+                c.className=`p-4 rounded-2xl border ${e?'bg-amber-50 border-amber-200 achievement-earned':'bg-slate-50 border-slate-100 opacity-70'}`;
+                c.innerHTML=`<div class="flex items-center gap-3"><div class="w-11 h-11 rounded-xl ${e?'bg-amber-100 text-amber-600':'bg-slate-200 text-slate-400'} flex items-center justify-center text-lg"><i class="fa-solid ${x.icon}"></i></div><div><p class="font-extrabold text-xs text-slate-800">${e?x.title:'Kilitli Rozet'}</p><p class="text-[11px] text-slate-500 mt-0.5">${x.desc}</p></div></div>`;
+                grid.appendChild(c);
+            });
+            HIDDEN_CUPS.forEach(x=>{
+                const e=appState.hiddenCups.includes(x.id),c=document.createElement('div');
+                c.className=`p-4 rounded-2xl border ${e?'bg-yellow-50 border-yellow-300 cup-unlocked':'bg-slate-900 border-slate-800'}`;
+                c.innerHTML=`<div class="flex items-center gap-3"><div class="w-11 h-11 rounded-xl ${e?'bg-yellow-200 text-yellow-700':'bg-slate-800 text-slate-500'} flex items-center justify-center text-lg"><i class="fa-solid ${x.icon}"></i></div><div><p class="font-extrabold text-xs ${e?'text-slate-800':'text-white'}">${e?x.secretTitle:'???'}</p><p class="text-[11px] ${e?'text-slate-500':'text-slate-400'} mt-0.5">${e?x.desc:'Gizli bir başarı. Nasıl açılacağı keşfedilmeyi bekliyor.'}</p></div></div>`;
+                grid.appendChild(c);
+            });
+            document.getElementById('hidden-cup-counter').innerText=`Gizli Kupalar: ${appState.hiddenCups.length} / ${HIDDEN_CUPS.length}`;
+        }
+
+        // Tab Switching
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-emerald-600');
+                btn.classList.add('text-slate-400');
+            });
+            const activeNav = document.getElementById(`nav-btn-${tabId}`);
+            if (activeNav) {
+                activeNav.classList.remove('text-slate-400');
+                activeNav.classList.add('text-emerald-600');
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // --- CALCULATOR LOGIC ---
+        function updateCalculatorPreview() {
+            const transport = document.getElementById('input-transport').value;
+            const diet = document.getElementById('input-diet').value;
+            const energy = document.getElementById('input-energy').value;
+            const digital = document.getElementById('input-digital').value;
+
+            document.getElementById('val-transport').innerText = transport + ' km';
+            
+            const dietTexts = {
+                '1': 'Vegan / Vejetaryen',
+                '2': 'Dengeli / Az Et',
+                '3': 'Yüksek Et Tüketimi'
+            };
+            document.getElementById('val-diet-text').innerText = dietTexts[diet];
+            document.getElementById('val-energy').innerText = energy + ' kWh';
+            document.getElementById('val-digital').innerText = digital + ' Saat';
+        }
+
+        function calculateCarbonFootprint() {
+            const transport = parseFloat(document.getElementById('input-transport').value);
+            const diet = parseInt(document.getElementById('input-diet').value);
+            const energy = parseFloat(document.getElementById('input-energy').value);
+            const digital = parseFloat(document.getElementById('input-digital').value);
+
+            // Eğitim amaçlı basitleştirilmiş tahmin. Gerçek karbon ayak izi;
+            // ülkenin elektrik emisyon faktörü, araç türü/yakıtı, seyahat koşulları,
+            // ısınma yakıtı ve beslenme ayrıntıları gibi daha fazla veri gerektirir.
+            const transportFactor = 0.00017; // t CO2e / km (temsili)
+            const dietFactor = {1: 0.45, 2: 0.75, 3: 1.10}[diet];
+            const electricityFactor = 0.00045; // t CO2e / kWh (temsili)
+            const digitalFactor = 0.015; // t CO2e / günlük saat / yıl (temsili)
+            let total = (transport * 52 * transportFactor)
+                      + (dietFactor * 52)
+                      + (energy * 12 * electricityFactor)
+                      + (digital * 365 * digitalFactor);
+            total = parseFloat(total.toFixed(2));
+
+            document.getElementById('calculator-result-card').classList.remove('hidden');
+            document.getElementById('result-tons').innerText = total;
+
+            let status = "Dengeli Yaşam 🌿";
+            let recs = `
+                <li>• Toplu taşıma veya bisiklet kullanımını artırarak ulaşım emisyonunu düşürebilirsiniz.</li>
+                <li>• Haftada 1-2 gün "Etmeyen Gün" ilan ederek beslenme ayak izinizi azaltabilirsiniz.</li>
+                <li>• LED ampullere geçiş ve stand-by cihazları kapatarak ev enerjisini optimize edin.</li>
+            `;
+
+            if (total > 6.0) {
+                status = "Yüksek Emisyon ⚠️";
+                recs = `
+                    <li>• Ulaşımda elektrikli araçlar veya toplu taşıma tercih etmelisiniz.</li>
+                    <li>• Kırmızı et tüketimini azaltıp yerel üreticileri destekleyin.</li>
+                    <li>• Enerji verimli cihazları ve uygun kullanım alışkanlıklarını tercih ederek tüketimi azaltmayı hedefleyin.</li>
+                `;
+            } else if (total < 3.5) {
+                status = "Süper Doğa Dostu 🌍";
+                recs = `
+                    <li>• Harika gidiyorsunuz! Bu sürdürülebilir alışkanlıklarınızı çevrenizle paylaşın.</li>
+                    <li>• Yerel ve mevsiminde beslenmeye devam edin.</li>
+                `;
+            }
+
+            document.getElementById('result-status-text').innerText = status;
+            document.getElementById('result-recommendations').innerHTML = recs;
+            appState.footprintStatus = status;
+            document.getElementById('calculator-result-card').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // --- FLASHCARDS DATA & RENDER ---
+        const flashcardsData = [
+            { id: 1, category: 'transport', title: 'Yürüyüş', icon: 'fa-person-walking', desc: 'Kısa mesafelerde yürümek doğrudan yakıt yakmadığı için ulaşım kaynaklı emisyonları azaltabilir.' },
+            { id: 2, category: 'transport', title: 'Bisiklet', icon: 'fa-bicycle', desc: 'Bisiklet, kısa ve orta mesafelerde düşük emisyonlu bir ulaşım seçeneğidir.' },
+            { id: 3, category: 'transport', title: 'Toplu Taşıma', icon: 'fa-bus', desc: 'Otobüs, tramvay ve tren gibi toplu taşıma seçenekleri yolcu başına emisyonu azaltabilir; sonuç doluluk ve enerji kaynağına bağlıdır.' },
+            { id: 4, category: 'transport', title: 'Araç Paylaşımı', icon: 'fa-car-side', desc: 'Aynı aracı birden fazla kişinin kullanması kişi başına düşen ulaşım emisyonunu azaltabilir.' },
+            { id: 5, category: 'transport', title: 'Demiryolu', icon: 'fa-train', desc: 'Elektrikli demiryolu sistemlerinin emisyonu kullanılan elektriğin üretim kaynağına göre değişir.' },
+            { id: 6, category: 'transport', title: 'Lastik Basıncı', icon: 'fa-gauge-high', desc: 'Uygun lastik basıncı yuvarlanma direncini ve gereksiz yakıt tüketimini azaltmaya yardımcı olur.' },
+            { id: 7, category: 'transport', title: 'Rölanti', icon: 'fa-car', desc: 'Araç motorunu gereksiz yere uzun süre çalışır bırakmak yakıt tüketir ve emisyon oluşturur.' },
+            { id: 8, category: 'transport', title: 'Uçuşlar', icon: 'fa-plane', desc: 'Havayolu ulaşımının iklim etkisi yalnızca yakıt tüketiminden ibaret değildir; uçuş yüksekliği ve diğer etkiler de değerlendirilir.' },
+            { id: 9, category: 'transport', title: 'Elektrikli Araç', icon: 'fa-charging-station', desc: 'Elektrikli araçların kullanım emisyonu egzoz borusunda oluşmaz; toplam iklim etkisi elektrik üretimi ve aracın üretimi gibi unsurlara da bağlıdır.' },
+            { id: 10, category: 'transport', title: 'Eco-Driving', icon: 'fa-road', desc: 'Yumuşak hızlanma, gereksiz sert frenlerden kaçınma ve uygun hızda sürüş yakıt tüketimini azaltabilir.' },
+            { id: 11, category: 'diet', title: 'Gıda İsrafı', icon: 'fa-utensils', desc: 'Üretilen ama yenmeyen gıdanın üretimi, taşınması ve işlenmesi için kullanılan kaynaklar boşa gider.' },
+            { id: 12, category: 'diet', title: 'Bitkisel Gıdalar', icon: 'fa-leaf', desc: 'Beslenmede bitkisel gıdaların payını artırmak birçok durumda tarım kaynaklı çevresel etkileri azaltabilir.' },
+            { id: 13, category: 'diet', title: 'Kırmızı Et', icon: 'fa-drumstick-bite', desc: 'Sığır eti üretiminin arazi kullanımı, yem, su ve sera gazı emisyonları üzerinde önemli etkileri olabilir.' },
+            { id: 14, category: 'diet', title: 'Su Ayak İzi', icon: 'fa-droplet', desc: 'Bir ürünün su ayak izi, üretim sürecinde doğrudan ve dolaylı kullanılan tatlı su miktarlarını değerlendiren bir göstergedir.' },
+            { id: 15, category: 'diet', title: 'Mevsimsel Gıda', icon: 'fa-apple-whole', desc: 'Mevsiminde üretilen gıdalar bazı koşullarda enerji ve depolama ihtiyacını azaltabilir; etki ürüne ve üretim sistemine göre değişir.' },
+            { id: 16, category: 'diet', title: 'Yerel Gıda', icon: 'fa-location-dot', desc: 'Yerel üretim tek başına düşük karbonlu olduğu anlamına gelmez; üretim yöntemi ve ürünün kendisi de önemlidir.' },
+            { id: 17, category: 'diet', title: 'Porsiyon Planlama', icon: 'fa-scale-balanced', desc: 'İhtiyaç kadar yemek planlamak hem gıda israfını hem de gereksiz satın almayı azaltabilir.' },
+            { id: 18, category: 'diet', title: 'Saklama', icon: 'fa-box-open', desc: 'Gıdaları uygun sıcaklıkta ve uygun kaplarda saklamak bozulmayı yavaşlatabilir.' },
+            { id: 19, category: 'diet', title: 'Artan Yemek', icon: 'fa-recycle', desc: 'Güvenli biçimde saklanan artan yemekleri değerlendirmek yenilebilir gıdanın çöpe gitmesini önleyebilir.' },
+            { id: 20, category: 'diet', title: 'Ambalaj', icon: 'fa-box', desc: 'Ambalaj etkisini değerlendirirken yalnızca malzemeye değil ürünün ağırlığına, kullanımına ve geri kazanımına da bakmak gerekir.' },
+            { id: 21, category: 'energy', title: 'LED', icon: 'fa-lightbulb', desc: 'LED aydınlatma, geleneksel akkor lambalara göre aynı aydınlık için çok daha az elektrik kullanabilir.' },
+            { id: 22, category: 'energy', title: 'Bekleme Tüketimi', icon: 'fa-plug', desc: 'Bazı elektronik cihazlar kapalı veya bekleme modundayken de az miktarda elektrik tüketebilir.' },
+            { id: 23, category: 'energy', title: 'Enerji Verimliliği', icon: 'fa-bolt', desc: 'Aynı hizmeti daha az enerji kullanarak sağlayabilmek enerji verimliliğidir.' },
+            { id: 24, category: 'energy', title: 'Yalıtım', icon: 'fa-house', desc: 'İyi bina yalıtımı uygun koşullarda ısıtma ve soğutma için gereken enerjiyi azaltabilir.' },
+            { id: 25, category: 'energy', title: 'Isı Pompası', icon: 'fa-temperature-arrow-up', desc: 'Isı pompaları çevreden ısı transfer ederek ısıtma ve soğutma sağlayabilir; verimleri koşullara göre değişir.' },
+            { id: 26, category: 'energy', title: 'Güneş Enerjisi', icon: 'fa-solar-panel', desc: 'Güneş fotovoltaik sistemleri güneş ışığını doğrudan elektriğe dönüştürür.' },
+            { id: 27, category: 'energy', title: 'Rüzgâr Enerjisi', icon: 'fa-wind', desc: 'Rüzgâr türbinleri hareketli havanın kinetik enerjisini elektrik enerjisine dönüştürür.' },
+            { id: 28, category: 'energy', title: 'Şebeke Elektriği', icon: 'fa-plug-circle-bolt', desc: 'Elektriğin karbon yoğunluğu, onu üretmek için kullanılan enerji kaynaklarının karışımına göre değişir.' },
+            { id: 29, category: 'energy', title: 'Enerji Etiketi', icon: 'fa-tags', desc: 'Enerji etiketleri cihazların enerji performansını karşılaştırmaya yardımcı olur.' },
+            { id: 30, category: 'energy', title: 'Verimli Kullanım', icon: 'fa-power-off', desc: 'Kullanılmayan ışık ve cihazları kapatmak basit bir enerji tasarrufu alışkanlığıdır.' },
+            { id: 31, category: 'digital', title: 'Veri Merkezleri', icon: 'fa-server', desc: 'Veri merkezleri sunucuları çalıştırmak ve soğutmak için elektrik kullanır.' },
+            { id: 32, category: 'digital', title: 'Video Akışı', icon: 'fa-video', desc: 'Video akışının çevresel etkisi cihaz, ağ ve veri merkezlerinin enerji kullanımıyla ilişkilidir.' },
+            { id: 33, category: 'digital', title: 'Ekran Parlaklığı', icon: 'fa-sun', desc: 'Ekran parlaklığını gereksiz yere yüksek tutmamak bazı cihazlarda enerji tüketimini azaltabilir.' },
+            { id: 34, category: 'digital', title: 'Cihaz Ömrü', icon: 'fa-mobile-screen-button', desc: 'Bir cihazı daha uzun süre güvenli ve verimli kullanmak, yeni cihaz üretme ihtiyacını azaltmaya yardımcı olabilir.' },
+            { id: 35, category: 'digital', title: 'Bulut Depolama', icon: 'fa-cloud', desc: 'Bulut hizmetleri fiziksel sunucular ve ağ altyapısı kullanır; gereksiz veri saklamak kaynak kullanımını artırabilir.' },
+            { id: 36, category: 'digital', title: 'Dijital Temizlik', icon: 'fa-trash', desc: 'Gereksiz dosyaları silmek depolama ihtiyacını azaltabilir; ancak tek tek e-postaların iklim etkisini abartmamak gerekir.' },
+            { id: 37, category: 'digital', title: 'Şarj', icon: 'fa-battery-three-quarters', desc: 'Şarjı dolan cihazları gereksiz yere uzun süre bağlı bırakmamak enerji kullanımını sınırlamaya yardımcı olabilir.' },
+            { id: 38, category: 'digital', title: 'E-Atık', icon: 'fa-laptop', desc: 'Elektronik atıklar değerli metaller ve geri kazanılabilir malzemeler içerir; uygun toplama sistemlerine verilmelidir.' },
+            { id: 39, category: 'waste', title: 'Atık Hiyerarşisi', icon: 'fa-layer-group', desc: 'Genel yaklaşım atığı önce önlemek, sonra yeniden kullanmak, geri dönüştürmek ve en son bertaraf etmektir.' },
+            { id: 40, category: 'waste', title: 'Yeniden Kullanım', icon: 'fa-arrows-rotate', desc: 'Bir ürünü yeniden kullanmak, yeni bir ürün üretme ihtiyacını azaltabilir.' },
+            { id: 41, category: 'waste', title: 'Geri Dönüşüm', icon: 'fa-recycle', desc: 'Geri dönüşüm malzemeleri yeniden hammadde olarak kullanmayı amaçlar; her malzeme her yerde aynı şekilde geri dönüştürülemez.' },
+            { id: 42, category: 'waste', title: 'Kompost', icon: 'fa-seedling', desc: 'Uygun organik atıkların kompostlanması, kontrollü koşullarda besin maddelerinin toprağa geri kazandırılmasını sağlayabilir.' },
+            { id: 43, category: 'waste', title: 'Mikroplastikler', icon: 'fa-water', desc: 'Büyük plastik parçaları çevrede zamanla daha küçük parçacıklara ayrılabilir; bu süreç ‘tamamen yok olma’ anlamına gelmez.' },
+            { id: 44, category: 'waste', title: 'Tek Kullanımlıklar', icon: 'fa-bag-shopping', desc: 'Tek kullanımlık ürünleri azaltmak, gereksiz kaynak tüketimini ve atık oluşumunu azaltabilir.' },
+            { id: 45, category: 'waste', title: 'Tekstil', icon: 'fa-shirt', desc: 'Giysileri daha uzun süre kullanmak, onarmak ve paylaşmak tekstil kaynak kullanımını azaltmaya yardımcı olabilir.' },
+            { id: 46, category: 'waste', title: 'Kağıt', icon: 'fa-file-lines', desc: 'Kağıt kullanımını azaltmak, çift taraflı kullanmak ve uygun geri dönüşüm sistemine vermek kaynakları koruyabilir.' },
+            { id: 47, category: 'waste', title: 'Su Tasarrufu', icon: 'fa-faucet-drip', desc: 'Musluğu gereksiz açık bırakmamak ve kaçakları onarmak doğrudan su tasarrufu sağlar.' },
+            { id: 48, category: 'waste', title: 'Atık Yağ', icon: 'fa-oil-can', desc: 'Atık kızartma yağları lavaboya dökülmemeli; uygun toplama noktalarına teslim edilmelidir.' },
+            { id: 49, category: 'waste', title: 'Pil Atıkları', icon: 'fa-battery-half', desc: 'Piller normal çöpe atılmamalı; uygun atık toplama sistemlerine teslim edilmelidir.' },
+            { id: 50, category: 'waste', title: 'E-Atık Toplama', icon: 'fa-recycle', desc: 'Kullanılmayan elektronikler yetkili toplama ve geri dönüşüm kanallarına verilmelidir.' }
+        ];
+
+        function renderFlashcards(filter = 'all') {
+            const container = document.getElementById('flashcards-container');
+            container.innerHTML = '';
+            
+            const filtered = filter === 'all' ? flashcardsData : flashcardsData.filter(f => f.category === filter);
+            
+            filtered.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col justify-between space-y-4 hover:border-indigo-300 transition group';
+                card.innerHTML = `
+                    <div class="flex items-start space-x-3">
+                        <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition">
+                            <i class="fa-solid ${item.icon}"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-800 text-sm">${item.title}</h4>
+                            <p class="text-xs text-slate-500 mt-1 leading-relaxed">${item.desc}</p>
+                        </div>
+                    </div>
+                    <div class="pt-2 border-t border-slate-50 flex items-center justify-between text-[11px] text-indigo-600 font-bold">
+                        <span>Bilgi Kartı #${item.id}</span>
+                        <button onclick="markCardLearned(${item.id})" class="bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-xl transition flex items-center space-x-1">
+                            <i class="fa-solid fa-check"></i>
+                            <span>Öğrendim</span>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function markCardLearned(id){
+            id=String(id);
+            if(!appState.learnedCards.includes(id)){
+                appState.learnedCards.push(id); awardAchievements(true); saveState();
+                showNotification('Bilgi kaydedildi — puan verilmedi.');
+            } else showNotification('Bu bilgi kartı zaten öğrenildi olarak işaretli.');
+        }
+
+        function filterFlashcards(cat, buttonEl) {
+            document.querySelectorAll('#flashcard-filters button').forEach(btn => {
+                btn.className = "category-btn px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition";
+            });
+            if (buttonEl) buttonEl.className = "category-btn active px-3.5 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow-sm transition";
+            renderFlashcards(cat);
+        }
+
+        // --- QUIZ DATA & LOGIC ---
+        const quizQuestions = [
+            
+{
+                        "question": "Karbon ayak izi nedir?",
+                        "options": [
+                                    "Bir kişinin veya etkinliğin doğrudan ve dolaylı sera gazı emisyonlarının toplamı",
+"Yalnızca elektrik faturası",
+"Sadece araç egzozu",
+"Sadece çöpe atılan plastik miktarı"
+                        ],
+                        "correct": 0,
+                        "explanation": "Karbon ayak izi genellikle farklı sera gazlarının CO₂ eşdeğeri cinsinden toplam etkisini ifade eder."
+            },
+{
+                        "question": "CO₂e neyi ifade eder?",
+                        "options": [
+                                    "Farklı sera gazlarının iklim etkisini CO₂ eşdeğerine dönüştürmeyi",
+"Atığın ağırlığını",
+"Suyun sıcaklığını",
+"Elektrik gerilimini"
+                        ],
+                        "correct": 0,
+                        "explanation": "CO₂e, farklı sera gazlarını karşılaştırılabilir bir ortak birime dönüştürmek için kullanılır."
+            },
+{
+                        "question": "Aşağıdakilerden hangisi atık hiyerarşisinde en önceliklidir?",
+                        "options": [
+                                    "Atığı kaynağında önlemek",
+"Atığı yakmak",
+"Atığı depolamak",
+"Her şeyi geri dönüştürmek"
+                        ],
+                        "correct": 0,
+                        "explanation": "En iyi atık, mümkünse hiç oluşmayan atıktır; önleme ve yeniden kullanım geri dönüşümden önce gelir."
+            },
+{
+                        "question": "Bir ürünün geri dönüştürülebilir olması ne anlama gelir?",
+                        "options": [
+                                    "Uygun sistem ve koşullarda malzemesinin geri kazanılabilmesi",
+"Doğada hemen yok olacağı",
+"Karbon ayak izinin sıfır olduğu",
+"Her yerde mutlaka geri dönüştürüleceği"
+                        ],
+                        "correct": 0,
+                        "explanation": "Geri dönüştürülebilirlik, gerçek hayatta toplama ve işleme altyapısına da bağlıdır."
+            },
+{
+                        "question": "Elektrikli araçların iklim etkisi için hangisi doğrudur?",
+                        "options": [
+                                    "Elektrik üretimi ve araç üretimi de toplam etkiye dahildir",
+"Hiç enerji kullanmaz",
+"Her koşulda sıfır emisyonludur",
+"Bataryası çevreyi hiç etkilemez"
+                        ],
+                        "correct": 0,
+                        "explanation": "Egzoz emisyonunun olmaması kullanım aşamasındaki yerel emisyonları azaltır; yaşam döngüsü etkileri ayrıca değerlendirilir."
+            },
+{
+                        "question": "Aşağıdakilerden hangisi enerji verimliliğine örnektir?",
+                        "options": [
+                                    "Aynı aydınlatmayı daha az elektrik kullanan LED ile sağlamak",
+"Daha fazla ışık yakmak",
+"Pencereyi sürekli açık tutmak",
+"Kullanılmayan cihazları açık bırakmak"
+                        ],
+                        "correct": 0,
+                        "explanation": "Enerji verimliliği aynı hizmeti daha az enerjiyle sağlamayı ifade eder."
+            },
+{
+                        "question": "Gıda israfını azaltmanın iyi bir yolu hangisidir?",
+                        "options": [
+                                    "İhtiyaç kadar satın almak ve uygun saklamak",
+"Son kullanma tarihini kontrol etmemek",
+"Yenilebilir gıdayı çöpe atmak",
+"İhtiyaçtan çok almak"
+                        ],
+                        "correct": 0,
+                        "explanation": "Planlama ve doğru saklama, yenilebilir gıdanın israfını azaltır."
+            },
+{
+                        "question": "Yerel ürün her zaman en düşük karbonlu mudur?",
+                        "options": [
+                                    "Hayır; üretim yöntemi ve ürünün kendisi de önemlidir",
+"Sadece ambalaj belirler",
+"Sadece fiyat belirler",
+"Evet, her zaman"
+                        ],
+                        "correct": 0,
+                        "explanation": "Taşıma mesafesi tek başına toplam emisyonu belirlemez."
+            },
+{
+                        "question": "Kompostlama temel olarak ne yapar?",
+                        "options": [
+                                    "Uygun organik maddelerin kontrollü biçimde ayrışmasını sağlar",
+"Metali eriterek yok eder",
+"Plastiği suya dönüştürür",
+"Elektrik üretimini garanti eder"
+                        ],
+                        "correct": 0,
+                        "explanation": "Kompostlama organik maddelerin kontrollü ayrışmasıdır."
+            },
+{
+                        "question": "Mikroplastikler için hangisi doğrudur?",
+                        "options": [
+                                    "Büyük plastiklerin parçalanmasıyla küçük parçacıklar oluşabilir",
+"Sadece camdan oluşur",
+"Suda çözünüp kaybolur",
+"Plastik tamamen yok olur"
+                        ],
+                        "correct": 0,
+                        "explanation": "Plastiklerin küçük parçacıklara ayrılması, onların çevreden yok olduğu anlamına gelmez."
+            },
+{
+                        "question": "Atık pil nereye verilmelidir?",
+                        "options": [
+                                    "Uygun pil toplama noktalarına",
+"Normal çöpe",
+"Lavaboya",
+"Toprağa"
+                        ],
+                        "correct": 0,
+                        "explanation": "Piller uygun toplama sistemlerinde ayrı toplanmalıdır."
+            },
+{
+                        "question": "E-atıkların önemli olmasının nedenlerinden biri nedir?",
+                        "options": [
+                                    "Değerli ve geri kazanılabilir maddeler içermeleri",
+"Sadece kağıttan oluşmaları",
+"Her zaman biyolojik olarak çözünmeleri",
+"Hiç kaynak içermemeleri"
+                        ],
+                        "correct": 0,
+                        "explanation": "Elektroniklerde metaller ve diğer geri kazanılabilir materyaller bulunabilir."
+            },
+{
+                        "question": "Su ayak izi neyi değerlendirir?",
+                        "options": [
+                                    "Bir ürün veya hizmetle ilişkili su kullanımını",
+"Sadece içme suyunu",
+"Elektrik voltajını",
+"Yalnızca yağmur miktarını"
+                        ],
+                        "correct": 0,
+                        "explanation": "Su ayak izi, üretim ve tüketimle ilişkili doğrudan/dolaylı su kullanımını değerlendiren bir göstergedir."
+            },
+{
+                        "question": "Enerji üretiminin karbon yoğunluğu neye bağlıdır?",
+                        "options": [
+                                    "Kullanılan enerji kaynaklarının karışımına",
+"Binanın rengine",
+"Sadece saatin kaç olduğuna",
+"Telefon markasına"
+                        ],
+                        "correct": 0,
+                        "explanation": "Kömür, doğal gaz, nükleer, hidro, rüzgâr ve güneş gibi kaynakların karışımı sonucu etkiler."
+            },
+{
+                        "question": "Aşağıdakilerden hangisi yeniden kullanıma örnektir?",
+                        "options": [
+                                    "Bir kavanozu temizleyip tekrar saklama kabı olarak kullanmak",
+"Yeni kavanoz almak",
+"Kavanozu yakmak",
+"Kavanozu çöpe atmak"
+                        ],
+                        "correct": 0,
+                        "explanation": "Yeniden kullanım mevcut ürünü yeni bir işlevle tekrar kullanmaktır."
+            },
+{
+                        "question": "LED lambaların temel avantajı nedir?",
+                        "options": [
+                                    "Aynı aydınlatma için akkor lambalara göre genellikle daha az elektrik kullanmaları",
+"Her zaman güneş enerjisiyle çalışmaları",
+"Hiç ısınmamaları",
+"Elektrik gerektirmemeleri"
+                        ],
+                        "correct": 0,
+                        "explanation": "LED'ler yüksek verimlilikleri ve uzun ömürleriyle öne çıkar."
+            },
+{
+                        "question": "Bekleme tüketimi nedir?",
+                        "options": [
+                                    "Bazı cihazların beklemede de elektrik tüketmesi",
+"Pil üretimi",
+"Cihazın su tüketmesi",
+"Güneş ışığı tüketimi"
+                        ],
+                        "correct": 0,
+                        "explanation": "Bekleme tüketimi cihaz tasarımına göre değişir ve bazı cihazlarda sıfıra yakın olabilir."
+            },
+{
+                        "question": "Yalıtımın amacı nedir?",
+                        "options": [
+                                    "Isı geçişini azaltarak ısıtma/soğutma ihtiyacını düşürmeye yardımcı olmak",
+"Elektriği üretmek",
+"Suyu temizlemek",
+"Plastiği geri dönüştürmek"
+                        ],
+                        "correct": 0,
+                        "explanation": "Yalıtım, binanın ısı kayıplarını/kazanımlarını azaltmaya yardımcı olur."
+            },
+{
+                        "question": "Aşağıdakilerden hangisi düşük emisyonlu ulaşım örneğidir?",
+                        "options": [
+                                    "Yürüyüş veya bisiklet",
+"Gereksiz rölanti",
+"Kısa mesafede uçuş",
+"Tek kişilik gereksiz araç yolculuğu"
+                        ],
+                        "correct": 0,
+                        "explanation": "Aktif ulaşım seçenekleri kullanım sırasında yakıt yakmaz."
+            },
+{
+                        "question": "Araçta uygun lastik basıncı neden önemlidir?",
+                        "options": [
+                                    "Yuvarlanma direncini ve yakıt tüketimini etkileyebilir",
+"Yakıtı bedavaya getirir",
+"Emisyonu fiziksel olarak yok eder",
+"Motoru elektrikliye çevirir"
+                        ],
+                        "correct": 0,
+                        "explanation": "Lastik basıncı üretici önerilerine uygun tutulduğunda verimliliğe katkı sağlayabilir."
+            },
+{
+                        "question": "Dijital hizmetlerin çevresel etkisi hangi unsurlarla ilişkilidir?",
+                        "options": [
+                                    "Cihazlar, ağlar ve veri merkezlerinin kaynak kullanımıyla",
+"Sadece klavye boyutuyla",
+"Sadece ekran rengiyle",
+"Hiçbiriyle"
+                        ],
+                        "correct": 0,
+                        "explanation": "Dijital hizmetler fiziksel altyapı ve enerji gerektirir."
+            },
+{
+                        "question": "Bir cihazı daha uzun süre kullanmak neden yararlı olabilir?",
+                        "options": [
+                                    "Yeni cihaz üretme ihtiyacını ve buna bağlı kaynak kullanımını azaltabilir",
+"Cihazı geri dönüştürür",
+"Bataryayı yeniler",
+"Elektrik kullanımını her zaman sıfırlar"
+                        ],
+                        "correct": 0,
+                        "explanation": "Üretim aşamasındaki kaynak ve emisyonlar da toplam yaşam döngüsünün parçasıdır."
+            },
+{
+                        "question": "Geri dönüşüm neden tek başına yeterli değildir?",
+                        "options": [
+                                    "Atık oluşumunu baştan önlemek genellikle daha önceliklidir",
+"Çünkü hiçbir malzeme geri kazanılamaz",
+"Çünkü geri dönüşüm imkânsızdır",
+"Çünkü bütün atıklar aynı değildir"
+                        ],
+                        "correct": 0,
+                        "explanation": "Önleme ve yeniden kullanım, kaynak tüketimini daha erken aşamada azaltır."
+            },
+{
+                        "question": "Sürdürülebilirlik yalnızca geri dönüşüm müdür?",
+                        "options": [
+                                    "Hayır; enerji, su, ulaşım, tüketim, ekosistemler ve sosyal boyutları da vardır",
+"Sadece plastikle ilgilidir",
+"Evet",
+"Sadece elektrikle ilgilidir"
+                        ],
+                        "correct": 0,
+                        "explanation": "Sürdürülebilirlik çok daha geniş bir kavramdır."
+            },
+{
+                        "question": "Biyoçeşitlilik neyi ifade eder?",
+                        "options": [
+                                    "Yaşamın genetik, tür ve ekosistem düzeylerindeki çeşitliliğini",
+"Sadece orman alanını",
+"Sadece bitki boyunu",
+"Sadece hayvan sayısını"
+                        ],
+                        "correct": 0,
+                        "explanation": "Biyoçeşitlilik farklı düzeylerdeki canlı çeşitliliğini kapsar."
+            },
+{
+                        "question": "Ekosistem nedir?",
+                        "options": [
+                                    "Canlılar ile cansız çevrelerinin etkileşim içindeki bütünü",
+"Sadece toprak",
+"Sadece hayvanlardan oluşan alan",
+"Sadece su"
+                        ],
+                        "correct": 0,
+                        "explanation": "Ekosistem biyotik ve abiyotik unsurlar ile aralarındaki ilişkileri kapsar."
+            },
+{
+                        "question": "Yenilenebilir enerji hangisidir?",
+                        "options": [
+                                    "Güneş enerjisi",
+"Petrol",
+"Doğal gaz",
+"Kömür"
+                        ],
+                        "correct": 0,
+                        "explanation": "Güneş enerjisi insan zaman ölçeğinde sürekli yenilenen bir kaynaktan yararlanır."
+            },
+{
+                        "question": "İklim ve hava durumu aynı şey midir?",
+                        "options": [
+                                    "Hayır; hava durumu kısa vadeli, iklim uzun dönemli örüntülerle ilgilidir",
+"İklim sadece günlük sıcaklıktır",
+"Hava durumu 100 yıllık ortalamadır",
+"Evet"
+                        ],
+                        "correct": 0,
+                        "explanation": "İki kavram ilişkilidir ancak zaman ölçekleri farklıdır."
+            },
+{
+                        "question": "Karbon yutağı nedir?",
+                        "options": [
+                                    "Atmosferden net karbon alabilen sistem veya süreç",
+"Plastik kutu",
+"Karbon üreten fabrika",
+"Elektrik sayacı"
+                        ],
+                        "correct": 0,
+                        "explanation": "Ormanlar, okyanuslar ve topraklar uygun koşullarda karbon yutağı işlevi görebilir."
+            },
+{
+                        "question": "Ağaç dikmek iklim sorununu tek başına çözer mi?",
+                        "options": [
+                                    "Hayır; emisyonları azaltmanın yerine geçmez ve ekosisteme uygun planlama gerekir",
+"Evet, tüm emisyonları siler",
+"Her yere aynı ağaç dikilmelidir",
+"Hiçbir etkisi yoktur"
+                        ],
+                        "correct": 0,
+                        "explanation": "Ağaçlandırma yararlı olabilir ancak emisyon azaltımının yerine geçmez."
+            },
+{
+                        "question": "Sürdürülebilir tüketimde en güçlü yaklaşım hangisidir?",
+                        "options": [
+                                    "Gereksiz tüketimi azaltmak ve mevcut ürünleri daha uzun kullanmak",
+"Her şeyi tek kullanımlık seçmek",
+"Bozuk ürünü hemen atmak",
+"Sürekli yeni ürün almak"
+                        ],
+                        "correct": 0,
+                        "explanation": "Tüketimi kaynağında azaltmak genellikle daha güçlü bir stratejidir."
+            },
+{
+                        "question": "Döngüsel ekonominin temel amacı hangisidir?",
+                        "options": [
+                                    "Ürün ve malzemeleri mümkün olduğunca uzun süre kullanımda tutmak",
+"Daha fazla ham madde tüketmek",
+"Geri dönüşümü tamamen bırakmak",
+"Her ürünü tek kullanımdan sonra atmak"
+                        ],
+                        "correct": 0,
+                        "explanation": "Döngüsel ekonomi; önleme, yeniden kullanım, onarım, yenileme ve geri dönüşüm yoluyla kaynakların değerini korumayı amaçlar."
+            },
+{
+                        "question": "Bir ürünü onarmak neden sürdürülebilirliğe katkı sağlayabilir?",
+                        "options": [
+                                    "Yeni ürün üretme ihtiyacını ve buna bağlı kaynak kullanımını azaltabilir",
+"Her zaman hiç enerji kullanmaz",
+"Ürünü otomatik olarak sıfır emisyonlu yapar",
+"Atığı anında yok eder"
+                        ],
+                        "correct": 0,
+                        "explanation": "Onarım kullanılabilir ürünün ömrünü uzatabilir ve yeni üretim ihtiyacını azaltabilir."
+            },
+{
+                        "question": "Şehirlerde yağmur suyunun yüzey akışını azaltmaya hangisi yardımcı olabilir?",
+                        "options": [
+                                    "Geçirgen yüzeyler ve uygun yeşil alanlar kullanmak",
+"Yeşil alanları kaldırmak",
+"Suyun toprağa ulaşmasını engellemek",
+"Her yeri tamamen betonlaştırmak"
+                        ],
+                        "correct": 0,
+                        "explanation": "Geçirgen yüzeyler ve yeşil altyapı, uygun koşullarda suyun sızmasına yardımcı olabilir."
+            },
+{
+                        "question": "Bir sürdürülebilirlik iddiasını değerlendirirken en doğru yaklaşım hangisidir?",
+                        "options": [
+                                    "Kaynağı, kapsamı ve kullanılan ölçüm yöntemini kontrol etmek",
+"Her sayıyı sorgulamadan doğru kabul etmek",
+"Sadece reklamdaki sloganı kabul etmek",
+"Kaynak aramamak"
+                        ],
+                        "correct": 0,
+                        "explanation": "Kaynak, kapsam, karşılaştırma ölçütü ve ölçüm yöntemi iddiaların değerlendirilmesinde önemlidir."
+            },
+{
+                        "question": "Yenilenebilir enerji kaynaklarından biri hangisidir?",
+                        "options": [
+                                    "Güneş enerjisi",
+"Doğal gaz",
+"Petrol",
+"Kömür"
+                        ],
+                        "correct": 0,
+                        "explanation": "Güneş enerjisi yenilenebilir bir kaynaktır; kömür, petrol ve doğal gaz fosil yakıtlardır."
+            },
+{
+                        "question": "Enerji verimliliği neyi amaçlar?",
+                        "options": [
+                                    "Aynı hizmeti daha az enerji kullanarak sağlayabilmeyi",
+"Tüm cihazları sürekli açık tutmayı",
+"Enerji kaynaklarını tamamen kullanmayı",
+"Daha fazla enerji tüketmeyi"
+                        ],
+                        "correct": 0,
+                        "explanation": "Enerji verimliliği, aynı veya benzer faydayı daha az enerjiyle sağlamaya odaklanır."
+            },
+{
+                        "question": "Elektronik cihazları kullanılmadığında kapatmak ne sağlayabilir?",
+                        "options": [
+                                    "Gereksiz enerji tüketimini azaltabilir",
+"Su tüketimini sıfırlar",
+"Her cihazı yeniler",
+"Cihazların mutlaka daha hızlı çalışmasını sağlar"
+                        ],
+                        "correct": 0,
+                        "explanation": "Kullanılmayan cihazları kapatmak, özellikle gereksiz bekleme ve kullanım tüketimini azaltabilir."
+            },
+{
+                        "question": "Geri dönüşümün temel amacı nedir?",
+                        "options": [
+                                    "Atık malzemelerin uygun süreçlerle yeniden hammadde veya üründe kullanılmasına katkı sağlamak",
+"Yeni hammadde kullanımını her durumda artırmak",
+"Her atığı aynı kutuya atmak",
+"Ürünleri daha hızlı çöpe göndermek"
+                        ],
+                        "correct": 0,
+                        "explanation": "Geri dönüşüm, uygun atıkların işlenerek malzeme döngüsüne yeniden kazandırılmasını amaçlar."
+            },
+{
+                        "question": "Yeniden kullanım ile geri dönüşüm arasındaki temel fark nedir?",
+                        "options": [
+                                    "Yeniden kullanım ürünü/malzemeyi aynı veya benzer işlevle tekrar kullanmayı, geri dönüşüm ise malzemeyi işleyerek yeniden değerlendirmeyi ifade eder",
+"Geri dönüşüm her zaman ürünü olduğu gibi tekrar kullanmaktır",
+"Yeniden kullanım her zaman ürünü parçalamaktır",
+"İkisi tamamen aynı işlemdir"
+                        ],
+                        "correct": 0,
+                        "explanation": "Yeniden kullanımda ürünün mevcut biçimi mümkün olduğunca korunurken geri dönüşümde malzeme işlenebilir."
+            },
+{
+                        "question": "Kompostlama hangi tür atıkların değerlendirilmesinde özellikle uygundur?",
+                        "options": [
+                                    "Uygun organik atıkların",
+"Cam şişelerin",
+"Metal kabloların",
+"Elektronik kartların"
+                        ],
+                        "correct": 0,
+                        "explanation": "Meyve-sebze artıkları gibi uygun organik maddeler kompostlama ile değerlendirilebilir."
+            },
+{
+                        "question": "Su ayak izi neyi anlatmaya yardımcı olur?",
+                        "options": [
+                                    "Bir ürünün, hizmetin veya faaliyetin üretimi ve tüketimiyle ilişkili su kullanımını değerlendirmeye",
+"Yalnızca deniz seviyesini ölçmeye",
+"Elektrik voltajını hesaplamaya",
+"Sadece yağış miktarını ölçmeye"
+                        ],
+                        "correct": 0,
+                        "explanation": "Su ayak izi, doğrudan ve dolaylı su kullanımını değerlendirmede kullanılan bir kavramdır."
+            },
+{
+                        "question": "Toprağın erozyona karşı korunmasına hangisi yardımcı olabilir?",
+                        "options": [
+                                    "Bitki örtüsünü korumak ve toprağı uygun biçimde yönetmek",
+"Her yüzeyi asfaltlamak",
+"Toprağı sürekli çıplak bırakmak",
+"Bitki örtüsünü tamamen kaldırmak"
+                        ],
+                        "correct": 0,
+                        "explanation": "Bitki örtüsü ve uygun arazi yönetimi, toprak kaybını azaltmaya yardımcı olabilir."
+            },
+{
+                        "question": "Biyoçeşitlilik neyi ifade eder?",
+                        "options": [
+                                    "Canlıların, türlerin ve ekosistemlerin çeşitliliğini",
+"Yalnızca hayvanların sayısını",
+"Sadece bitki boylarını",
+"Atmosferdeki oksijen yüzdesini"
+                        ],
+                        "correct": 0,
+                        "explanation": "Biyoçeşitlilik; genetik çeşitlilik, tür çeşitliliği ve ekosistem çeşitliliği gibi düzeyleri kapsar."
+            },
+{
+                        "question": "İstilacı yabancı türler neden dikkat gerektirebilir?",
+                        "options": [
+                                    "Bazıları yerel ekosistemleri ve yerli türleri olumsuz etkileyebilir",
+"Sadece şehirlerde bulunurlar",
+"Hiçbir canlıyla etkileşmezler",
+"Her zaman tüm ekosistemleri iyileştirirler"
+                        ],
+                        "correct": 0,
+                        "explanation": "Bazı istilacı türler kaynak rekabeti, avcılık veya hastalık gibi yollarla yerel ekosistemleri etkileyebilir."
+            },
+{
+                        "question": "Sürdürülebilir ulaşım seçeneklerinden biri hangisidir?",
+                        "options": [
+                                    "Uygun mesafelerde yürümek veya bisiklet kullanmak",
+"Motoru gereksiz yere çalışır bırakmak",
+"Gereksiz yolculukları artırmak",
+"Her kısa mesafede tek kişiyle otomobil kullanmak"
+                        ],
+                        "correct": 0,
+                        "explanation": "Yürüme ve bisiklet, uygun koşullarda düşük emisyonlu ulaşım seçenekleridir."
+            },
+{
+                        "question": "Toplu taşımanın önemli çevresel avantajlarından biri nedir?",
+                        "options": [
+                                    "Uygun kullanımda kişi başına düşen ulaşım kaynak tüketimini ve emisyonları azaltmaya yardımcı olabilmesi",
+"Her zaman sıfır emisyonlu olması",
+"Hiç enerji kullanmaması",
+"Tüm yolculukları ücretsiz yapması"
+                        ],
+                        "correct": 0,
+                        "explanation": "Toplu taşımanın çevresel etkisi araca, doluluğa ve enerji kaynağına bağlıdır; ancak yolcu başına kaynak kullanımını azaltabilir."
+            },
+{
+                        "question": "Yerel ve mevsimsel ürünleri tercih etmek neden bazı durumlarda yararlı olabilir?",
+                        "options": [
+                                    "Üretim ve taşıma koşullarına bağlı bazı çevresel etkileri azaltmaya yardımcı olabilir",
+"Her durumda en ucuz seçenektir",
+"Su kullanımını kesinlikle sıfırlar",
+"Her ürünü otomatik olarak sıfır emisyonlu yapar"
+                        ],
+                        "correct": 0,
+                        "explanation": "Çevresel etki; ürünün nasıl üretildiği, taşındığı ve saklandığı gibi birçok etkene bağlıdır."
+            },
+{
+                        "question": "İklim değişikliği ile mücadelede en temel yaklaşım hangisidir?",
+                        "options": [
+                                    "Sera gazı emisyonlarını azaltmak ve değişen koşullara uyum sağlamak",
+"Sadece plastik toplamak",
+"Enerji tüketimini artırmak",
+"Yalnızca hava tahminlerine bakmak"
+                        ],
+                        "correct": 0,
+                        "explanation": "İklim eylemi hem emisyonları azaltmayı (azaltım) hem de etkilerle başa çıkmayı (uyum) kapsar."
+            },
+{
+                        "question": "Mikroplastikler nedir?",
+                        "options": [
+                                    "Çok küçük plastik parçacıkları veya parçaları",
+"Gaz hâlindeki su molekülleri",
+"Metal oksitlerin tamamı",
+"Sadece doğal kum taneleri"
+                        ],
+                        "correct": 0,
+                        "explanation": "Mikroplastikler çok küçük plastik parçacıklarıdır ve farklı çevresel ortamlarda bulunabilirler."
+            }
+];
+
+        let currentQuizQuestions = [];
+
+        function startQuizRound() {
+            const indices = Array.from({length: quizQuestions.length}, (_,i)=>i);
+            for(let i=indices.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [indices[i],indices[j]]=[indices[j],indices[i]]; }
+            currentQuizQuestions = indices.slice(0,10).map(i=>i);
+            appState.quizCurrentIndex=0;
+            appState.quizScore=0;
+            document.getElementById('quiz-question-box').classList.remove('hidden');
+            document.getElementById('quiz-complete-box').classList.add('hidden');
+            loadQuizQuestion();
+        }
+
+        function loadQuizQuestion() {
+            const q = quizQuestions[currentQuizQuestions[appState.quizCurrentIndex]];
+            document.getElementById('quiz-current-num').innerText = appState.quizCurrentIndex + 1;
+            document.getElementById('quiz-total-num').innerText = currentQuizQuestions.length;
+            const questionText = document.getElementById('quiz-question-text');
+            questionText.innerText = q.question;
+            questionText.classList.remove('quiz-question-enter');
+            void questionText.offsetWidth;
+            questionText.classList.add('quiz-question-enter');
+            
+            const progressPct = ((appState.quizCurrentIndex + 1) / currentQuizQuestions.length) * 100;
+            document.getElementById('quiz-progress-bar').style.width = progressPct + '%';
+
+            const optsContainer = document.getElementById('quiz-options-container');
+            optsContainer.innerHTML = '';
+            document.getElementById('quiz-explanation-box').classList.add('hidden');
+            appState.quizAnswered = false;
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "quiz-option-enter w-full text-left p-3.5 rounded-2xl bg-slate-50 border border-slate-200 hover:border-amber-400 font-semibold text-slate-700 text-xs transition flex items-center justify-between";
+                btn.style.animationDelay = `${idx * 55}ms`;
+                btn.innerHTML = `<span>${opt}</span><i class="fa-regular fa-circle text-slate-400"></i>`;
+                btn.onclick = () => selectQuizOption(idx, btn);
+                optsContainer.appendChild(btn);
+            });
+        }
+
+        function selectQuizOption(selectedIndex, btnElement) {
+            if (appState.quizAnswered) return;
+            appState.quizAnswered = true;
+
+            const qIndex = currentQuizQuestions[appState.quizCurrentIndex];
+            const q = quizQuestions[qIndex];
+            const allOpts = document.querySelectorAll('#quiz-options-container button');
+
+            if (selectedIndex === q.correct) {
+                appState.totalCorrectAnswers++;
+                const masteredId=String(qIndex);
+                if(!appState.masteredQuestions.includes(masteredId)) appState.masteredQuestions.push(masteredId);
+                btnElement.className = "quiz-correct-pop w-full text-left p-3.5 rounded-2xl bg-emerald-50 border border-emerald-500 font-bold text-emerald-800 text-xs flex items-center justify-between";
+                btnElement.innerHTML = `<span>${btnElement.innerText}</span><i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>`;
+                appState.quizScore++;
+            } else {
+                btnElement.className = "w-full text-left p-3.5 rounded-2xl bg-rose-50 border border-rose-500 font-bold text-rose-800 text-xs flex items-center justify-between";
+                btnElement.innerHTML = `<span>${btnElement.innerText}</span><i class="fa-solid fa-circle-xmark text-rose-600 text-base"></i>`;
+                
+                // Doğruyu göster
+                allOpts[q.correct].className = "w-full text-left p-3.5 rounded-2xl bg-emerald-50 border border-emerald-500 font-bold text-emerald-800 text-xs flex items-center justify-between";
+            }
+
+            document.getElementById('quiz-explanation-text').innerText = q.explanation;
+            document.getElementById('quiz-explanation-box').classList.remove('hidden');
+        }
+
+        function nextQuizQuestion() {
+            appState.quizCurrentIndex++;
+            if (appState.quizCurrentIndex < currentQuizQuestions.length) {
+                loadQuizQuestion();
+            } else {
+                // Quiz bitti
+                document.getElementById('quiz-question-box').classList.add('hidden');
+                document.getElementById('quiz-explanation-box').classList.add('hidden');
+                document.getElementById('quiz-complete-box').classList.remove('hidden');
+                document.getElementById('quiz-final-score').innerText = appState.quizScore;
+                appState.quizzesCompleted++;
+                appState.bestQuizScore = Math.max(appState.bestQuizScore, appState.quizScore);
+                if (appState.quizScore >= 8) appState.highScoreQuizzes++;
+                if (appState.quizScore === 10) appState.perfectQuizzes++;
+                awardAchievements(true);
+                addPoints(appState.quizScore * 20);
+            }
+        }
+
+        function restartQuiz() { startQuizRound(); }
+
+        // --- WASTE REDUCTION CHECKLIST ---
+        const wasteChecklistData = [
+            { id: 'task-1', category: 'food', title: 'Haftalık yemek planı yap', desc: 'İhtiyacına göre plan hazırlayarak gereksiz gıda alımını azalt.', points: 10 },
+            { id: 'task-2', category: 'food', title: 'Alışveriş listesi kullan', desc: 'Markete gitmeden önce liste oluştur ve mümkün olduğunca listeye bağlı kal.', points: 10 },
+            { id: 'task-3', category: 'food', title: 'Buzdolabını düzenle', desc: 'Yakında tüketilecek ürünleri görünür yere koyarak unutulmalarını önle.', points: 10 },
+            { id: 'task-4', category: 'food', title: 'Porsiyonunu planla', desc: 'Tüketebileceğin miktarda servis yap; gerekirse sonradan ekle.', points: 10 },
+            { id: 'task-5', category: 'food', title: 'Gıdayı doğru sakla', desc: 'Ürünleri uygun koşullarda saklayarak erken bozulmayı azalt.', points: 10 },
+            { id: 'task-6', category: 'food', title: 'Artan yemeği değerlendir', desc: 'Güvenli şekilde saklanan artan yemekleri daha sonra tüket veya uygun biçimde değerlendir.', points: 15 },
+            { id: 'task-7', category: 'food', title: 'Yenilebilir gıdayı ayır', desc: 'Tüketilebilir durumdaki gıdayı gereksiz yere çöpe atma.', points: 10 },
+            { id: 'task-8', category: 'water', title: 'Diş fırçalarken musluğu kapat', desc: 'Fırçalama sırasında gereksiz su akışını durdur.', points: 10 },
+            { id: 'task-9', category: 'water', title: 'Duş süresini azalt', desc: 'Güvenli ve rahat bir duş için gereksiz uzun süre suyu açık bırakma.', points: 10 },
+            { id: 'task-10', category: 'water', title: 'Su kaçağını bildir', desc: 'Damlayan musluk veya kaçakları yetişkinlere bildirip onarılmasını sağla.', points: 15 },
+            { id: 'task-11', category: 'water', title: 'Sebze yıkama suyunu değerlendir', desc: 'Uygun ve temiz olduğu durumda bazı suların yeniden kullanımını araştır.', points: 10 },
+            { id: 'task-12', category: 'water', title: 'Bulaşık makinesini tam dolu çalıştır', desc: 'Uygun olduğunda makineyi gereksiz yarım yüklerle çalıştırmaktan kaçın.', points: 10 },
+            { id: 'task-13', category: 'water', title: 'Bahçeyi uygun zamanda sula', desc: 'Buharlaşmanın yüksek olduğu saatler yerine uygun sulama zamanlarını tercih et.', points: 10 },
+            { id: 'task-14', category: 'fashion', title: 'Kıyafeti onar', desc: 'Küçük yırtık veya sökükleri mümkünse tamir ederek kullanım ömrünü uzat.', points: 15 },
+            { id: 'task-15', category: 'fashion', title: 'Kıyafet takası yap', desc: 'Kullanmadığın ama iyi durumdaki kıyafetleri uygun kişilerle değiş tokuş etmeyi değerlendir.', points: 15 },
+            { id: 'task-16', category: 'fashion', title: 'İkinci el seçeneğini değerlendir', desc: 'Yeni ürün almadan önce uygun ikinci el seçeneklerini araştır.', points: 15 },
+            { id: 'task-17', category: 'fashion', title: 'Kıyafeti doğru yıka', desc: 'Etiketteki bakım talimatlarına uygun yıkama ile ürün ömrünü koru.', points: 10 },
+            { id: 'task-18', category: 'fashion', title: 'Tekstil atığını ayır', desc: 'Yerel sistem uygunsa tekstil atıklarını ilgili toplama noktasına bırak.', points: 10 },
+            { id: 'task-19', category: 'energy', title: 'Gereksiz ışıkları kapat', desc: 'Boş odalarda açık kalan ışıkları kapat.', points: 10 },
+            { id: 'task-20', category: 'energy', title: 'LED kullan', desc: 'Uygun olduğunda eski akkor lambaları daha verimli LED aydınlatmayla değiştir.', points: 10 },
+            { id: 'task-21', category: 'energy', title: 'Cihazları gereksiz çalıştırma', desc: 'Kullanılmayan televizyon, bilgisayar ve benzeri cihazları kapat.', points: 10 },
+            { id: 'task-22', category: 'energy', title: 'Bekleme tüketimini kontrol et', desc: 'Kullanım kılavuzuna uygun biçimde gereksiz bekleme tüketimini azalt.', points: 10 },
+            { id: 'task-23', category: 'energy', title: 'Doğal ışıktan yararlan', desc: 'Gündüz yeterli ışık varsa yapay aydınlatmayı gereksiz yere kullanma.', points: 10 },
+            { id: 'task-24', category: 'energy', title: 'Yalıtımı koru', desc: 'Kapı ve pencere çevresindeki sorunları yetişkinlere bildir; uygun yalıtım enerji kaybını azaltabilir.', points: 15 },
+            { id: 'task-25', category: 'energy', title: 'Enerji etiketini karşılaştır', desc: 'Yeni cihaz alırken enerji verimliliği bilgilerini karşılaştır.', points: 10 },
+            { id: 'task-26', category: 'waste', title: 'Matara kullan', desc: 'Tek kullanımlık içecek kapları yerine yeniden kullanılabilir bir matara kullan.', points: 10 },
+            { id: 'task-27', category: 'waste', title: 'Bez çanta/file kullan', desc: 'Tek kullanımlık poşet ihtiyacını azaltmak için dayanıklı çanta kullan.', points: 10 },
+            { id: 'task-28', category: 'waste', title: 'Kağıdı çift taraflı kullan', desc: 'Uygun belgelerde kağıdın iki yüzünü kullan.', points: 10 },
+            { id: 'task-29', category: 'waste', title: 'Atıkları ayır', desc: 'Bulunduğun yerdeki ayrı toplama kurallarına göre atıkları ayır.', points: 10 },
+            { id: 'task-30', category: 'waste', title: 'Atık pili ayrı topla', desc: 'Pilleri normal çöpe atma; uygun toplama noktasına teslim et.', points: 15 },
+            { id: 'task-31', category: 'waste', title: 'E-atığı uygun noktaya ver', desc: 'Kullanılmayan elektronik ürünleri uygun toplama/geri dönüşüm kanalına teslim et.', points: 15 },
+            { id: 'task-32', category: 'waste', title: 'Atık yağı lavaboya dökme', desc: 'Atık bitkisel yağları uygun toplama sistemine teslim et.', points: 15 },
+            { id: 'task-33', category: 'waste', title: 'Kompostu araştır', desc: 'Uygun organik atıklar için bulunduğun yerde güvenli kompost seçeneklerini araştır.', points: 10 }
+        ];
+
+        function renderWasteChecklist(filter = 'all') {
+            const container = document.getElementById('waste-checklist-container');
+            container.innerHTML = '';
+
+            const filtered = filter === 'all' ? wasteChecklistData : wasteChecklistData.filter(i => i.category === filter);
+
+            filtered.forEach(item => {
+                const isChecked = appState.completedTasks.includes(item.id);
+                const card = document.createElement('div');
+                card.className = `p-4 rounded-2xl border transition flex items-center justify-between ${isChecked ? 'bg-emerald-50/60 border-emerald-200' : 'bg-white border-slate-100 hover:border-rose-300'}`;
+                card.innerHTML = `
+                    <div class="flex items-center space-x-3.5">
+                        <button onclick="toggleWasteTask('${item.id}', ${item.points})" class="w-7 h-7 rounded-xl flex items-center justify-center border transition ${isChecked ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-slate-300 bg-white hover:border-emerald-500'}">
+                            ${isChecked ? '<i class="fa-solid fa-check text-xs"></i>' : ''}
+                        </button>
+                        <div>
+                            <h4 class="font-bold text-xs text-slate-800 ${isChecked ? 'line-through text-slate-400' : ''}">${item.title}</h4>
+                            <p class="text-[11px] text-slate-500 mt-0.5">${item.desc}</p>
+                        </div>
+                    </div>
+                    <span class="text-[11px] font-extrabold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-xl border border-amber-200 shrink-0">+${item.points} Puan</span>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function filterWasteCategory(cat, buttonEl) {
+            document.querySelectorAll('.waste-cat-btn').forEach(btn => {
+                btn.className = "waste-cat-btn px-4 py-2 rounded-xl text-xs font-bold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 whitespace-nowrap transition";
+            });
+            if (buttonEl) buttonEl.className = "waste-cat-btn active px-4 py-2 rounded-xl text-xs font-bold bg-rose-600 text-white whitespace-nowrap shadow-sm transition";
+            renderWasteChecklist(cat);
+        }
+
+        function toggleWasteTask(id, pts) {
+            const index = appState.completedTasks.indexOf(id);
+            if (index > -1) {
+                appState.completedTasks.splice(index, 1);
+            } else {
+                appState.completedTasks.push(id);
+                addPoints(pts);
+                showNotification(`Görev Tamamlandı! +${pts} Puan`);
+            }
+            saveState();
+            // Aktif kategori filtresini koruyarak yeniden render et
+            const activeBtn = document.querySelector('.waste-cat-btn.active');
+            let cat = 'all';
+            if (activeBtn.textContent.includes('Gıda')) cat = 'food';
+            else if (activeBtn.textContent.includes('Su')) cat = 'water';
+            else if (activeBtn.textContent.includes('Moda')) cat = 'fashion';
+            else if (activeBtn.textContent.includes('Enerji')) cat = 'energy';
+            renderWasteChecklist(cat);
+        }
+
+        // Initialize App on Load
+        window.onload = function() {
+            loadState();
+            renderFlashcards();
+            loadQuizQuestion();
+            renderWasteChecklist();
+        };
+    </script>
+</body>
+</html>
